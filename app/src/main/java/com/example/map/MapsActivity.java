@@ -9,10 +9,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private LatLng location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +40,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        // 皇居辺りの緯度経度
+        location = new LatLng(35.68, 139.76);
+        // marker 追加
+        mMap.addMarker(new MarkerOptions().position(location).title("Tokyo"));
+        // camera 移動
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 10));
+
+        // タップした時のリスナーをセット
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng tapLocation) {
+                // tapされた位置の緯度経度
+                location = new LatLng(tapLocation.latitude, tapLocation.longitude);
+                String str = String.format(Locale.US, "%f, %f", tapLocation.latitude, tapLocation.longitude);
+                mMap.addMarker(new MarkerOptions().position(location).title(str));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
+
+
+            }
+        });
+        // 長押しのリスナーをセット
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng longpushLocation) {
+                LatLng newlocation = new LatLng(longpushLocation.latitude, longpushLocation.longitude);
+                mMap.addMarker(new MarkerOptions().position(newlocation).title("" + longpushLocation.latitude + " :" + longpushLocation.longitude));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 14));
+            }
+        });
     }
 }
